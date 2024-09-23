@@ -2,6 +2,31 @@ document.addEventListener('DOMContentLoaded', function () {
     const dropzone = document.getElementById('dropzone');
     const hexOutput = document.getElementById('hex-output');
 
+    // Style hex output container to resize and provide space for the image thumbnail
+    hexOutput.style.width = '60%'; // Resize to allow space for the thumbnail on the right
+    hexOutput.style.float = 'left'; // Align hex output to the left
+
+    // Create the container for the image preview
+    const thumbnailContainer = document.createElement('div');
+    thumbnailContainer.style.position = 'relative'; // Relative to body, bottom right location
+    thumbnailContainer.style.float = 'right'; // Float to the right side of the body
+    thumbnailContainer.style.width = '25%'; // Set initial width of the container
+    thumbnailContainer.style.height = 'auto'; // Let height adjust based on content
+    thumbnailContainer.style.padding = '10px';
+    thumbnailContainer.style.border = '1px solid #ccc';
+    thumbnailContainer.style.backgroundColor = '#f9f9f9';
+    thumbnailContainer.style.textAlign = 'center';
+    thumbnailContainer.style.resize = 'both'; // Make the container resizable
+    thumbnailContainer.style.overflow = 'auto'; // Ensure overflow content is visible
+
+    const thumbnailCaption = document.createElement('p');
+    thumbnailCaption.textContent = 'Content Pack Thumbnail';
+    thumbnailCaption.style.fontSize = '12px';
+    thumbnailCaption.style.color = '#666';
+    thumbnailContainer.appendChild(thumbnailCaption);
+
+    document.body.appendChild(thumbnailContainer); // Append the container to the body
+
     dropzone.addEventListener('dragover', (event) => {
         event.preventDefault();
         dropzone.style.borderColor = '#000';
@@ -59,11 +84,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (fileHeader === 'TTP') {
                     const ttpCheckBytes = [0x70, 0x6D, 0x66, 0x00, 0x0A, 0x0D, 0x01, 0x00, 0x01, 0x00, 0x01];
                     if (!checkTTPHeader(extractedData, ttpCheckBytes)) {
-                        // If the bytes don't match, modify the extracted data to match the required pattern
+                        // Modify the extracted data to match the required pattern if it doesn't match
                         modifyTTPHeader(extractedData, ttpCheckBytes);
-                        hexOutput.textContent += '\nThe extracted data was modified to match the required TTP pattern.\n';
-                    } else {
-                        hexOutput.textContent += '\nThe extracted data matches the required TTP pattern.\n';
                     }
                 }
 
@@ -183,12 +205,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const blob = new Blob([imageData.bytes], { type: imageData.type });
         const imageUrl = URL.createObjectURL(blob);
 
-        // Display the image
+        // Create an img element for the image
         const imageElement = document.createElement('img');
         imageElement.src = imageUrl;
         imageElement.alt = 'Extracted Image';
-        imageElement.style.marginTop = '20px';
-        imageElement.style.maxWidth = '100%';
-        hexOutput.appendChild(imageElement);
+        imageElement.style.maxWidth = '100%'; // Allow resizable container to control width
+        imageElement.style.maxHeight = '100%'; // Allow resizable container to control height
+
+        // Clear previous image and append the new image
+        thumbnailContainer.innerHTML = '';
+        thumbnailContainer.appendChild(thumbnailCaption); // Re-append the caption
+        thumbnailContainer.appendChild(imageElement);
+        thumbnailContainer.style.display = 'block'; // Make the container visible
     }
 });
